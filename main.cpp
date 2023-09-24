@@ -131,6 +131,7 @@ std::cout << "ACCEPT" << std::endl;
                         int bytes_read = cqe->res;
                         if (bytes_read <= 0) {
                             shutdown(user_data->fd, SHUT_RDWR);
+                            exit(0);
                         } else {
                            add_socket_write(&ring, user_data->fd, bytes_read);
                         }
