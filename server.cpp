@@ -69,6 +69,7 @@ void Server::start_listen(){
         exit(0);
     }
     
+    // Начало отслеживания
     add_accept(&ring, listener, (struct sockaddr *) &client_addr, &client_addr_len);
 
     while(1)
@@ -86,22 +87,24 @@ void Server::start_listen(){
             conn_info *user_data = (conn_info *) io_uring_cqe_get_data(cqe);
 
             unsigned type = user_data->type;
-            if (type == ACCEPT) {
+            if (type == ACCEPT) {       // Получение данных из сокета
                 int sock_conn_fd = cqe->res;
-                add_socket_read(&ring, sock_conn_fd, MAX_MESSAGE_LEN);
+                if (sock_conn_fd >= 0){
+                    add_socket_read(&ring, sock_conn_fd, MAX_MESSAGE_LEN);
+                }
+                
                 add_accept(&ring, listener, (struct sockaddr *) &client_addr, &client_addr_len);
                 //std::cout << "ACCEPT" << std::endl;
-            } else if (type == READ) {
+            } else if (type == READ) {  // Запись данных в файл <port>.txt
                 int bytes_read = cqe->res;
                 if (bytes_read <= 0) {
                     shutdown(user_data->fd, SHUT_RDWR);
-                    exit(0);
+                    //exit(0);
                 } else {
                    add_socket_write(&ring, user_data->fd, bytes_read);
                 }
                 //std::cout << "READ" << std::endl;
-               
-            } else if (type == WRITE){
+            } else if (type == WRITE){  // Чтение данных из сокета
                 add_socket_read(&ring, user_data->fd, MAX_MESSAGE_LEN);
                 //std::cout << "WRITE" << std::endl;
             }

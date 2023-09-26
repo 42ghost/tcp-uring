@@ -19,15 +19,14 @@
 
 class Server{    
     typedef struct conn_info {
-        int fd;
-        unsigned type;
+        uint32_t fd;
+        uint32_t type;
     } conn_info;
     
     enum {
         ACCEPT,
         READ,
         WRITE,
-        OK,
     };
     
     int listener;
